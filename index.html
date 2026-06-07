@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ILAN — Life RPG</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;--bd:rgba(255,255,255,0.07);--bd2:rgba(255,255,255,0.12);--tx:#f0f0f8;--tx2:#8888aa;--tx3:#4a4a6a;--gold:#f5c842;--gold2:#c9982a;--xp:#4a9eff;--xp2:#2a6fd4;--green:#3dcc7a;--red:#ff5555;--purple:#9b6dff;--orange:#ff8c42;--ca:var(--red);--cb:var(--xp);--cc:var(--gold);--cd:var(--purple);--ce:var(--red);--cf:var(--green);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--tx);font-family:Syne,sans-serif;min-height:100vh;}
+.app{display:grid;grid-template-columns:240px 1fr;grid-template-rows:56px 1fr;min-height:100vh;}
+.topbar{grid-column:1/-1;background:var(--bg2);border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 20px;gap:12px;position:sticky;top:0;z-index:100;}
+.logo{font-size:17px;font-weight:800;letter-spacing:.1em;color:var(--gold);}
+.logo span{color:var(--tx2);font-weight:400;font-size:12px;margin-left:6px;letter-spacing:0;}
+.tstats{display:flex;gap:16px;margin-left:auto;align-items:center;}
+.tstat{font-size:12px;color:var(--tx2);}
+.tstat b{font-family:'DM Mono',monospace;font-size:14px;font-weight:700;}
+.lvbadge{background:linear-gradient(135deg,var(--xp2),var(--purple));padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.sidebar{background:var(--bg2);border-right:1px solid var(--bd);padding:16px 12px;display:flex;flex-direction:column;gap:4px;overflow-y:auto;}
+.nsec{font-size:10px;font-weight:700;letter-spacing:.12em;color:var(--tx3);text-transform:uppercase;padding:10px 8px 4px;}
+.ni{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:500;color:var(--tx2);transition:all .15s;border:1px solid transparent;}
+.ni:hover,.ni.active{background:var(--bg3);color:var(--tx);}
+.ni.active{border-color:var(--bd2);}
+.ndot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.nc{margin-left:auto;background:var(--bg);border-radius:20px;padding:1px 6px;font-size:10px;color:var(--tx3);}
+.main{overflow-y:auto;padding:24px;}
+.card{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:18px;margin-bottom:14px;}
+.csm{background:var(--bg3);border:1px solid var(--bd);border-radius:12px;padding:12px;}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.ptitle{font-size:20px;font-weight:800;margin-bottom:3px;}
+.psub{font-size:12px;color:var(--tx2);margin-bottom:20px;}
+.stitle{font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.08em;margin:18px 0 10px;}
+.stitle:first-child{margin-top:0;}
+.snum{font-size:20px;font-weight:800;}
+.slbl{font-size:11px;color:var(--tx2);margin-top:2px;}
+.xbar{background:var(--bg3);border-radius:20px;height:6px;overflow:hidden;margin-top:5px;}
+.xfill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--xp2),var(--xp));transition:width .6s;}
+.tag{display:inline-flex;align-items:center;gap:3px;font-size:10px;padding:2px 7px;border-radius:20px;font-weight:500;}
+.te{background:rgba(61,204,122,.12);color:var(--green);}
+.tm{background:rgba(255,140,66,.12);color:var(--orange);}
+.th{background:rgba(255,85,85,.12);color:var(--red);}
+.tp{background:rgba(155,109,255,.12);color:var(--purple);}
+.tx{background:rgba(74,158,255,.1);color:var(--xp);}
+.tg{background:rgba(245,200,66,.1);color:var(--gold);}
+.tt{background:rgba(255,255,255,.05);color:var(--tx3);font-size:10px;}
+.sbadge{display:inline-flex;align-items:center;gap:3px;background:rgba(255,140,66,.12);color:var(--orange);border-radius:20px;padding:2px 7px;font-size:11px;font-weight:600;}
+.tc{background:var(--bg2);border:1px solid var(--bd);border-radius:12px;padding:14px;display:flex;align-items:flex-start;gap:12px;position:relative;overflow:hidden;margin-bottom:8px;transition:border .15s;}
+.tc:hover{border-color:var(--bd2);}
+.tc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+.tc.ca::before{background:var(--red);}
+.tc.cb::before{background:var(--xp);}
+.tc.cc::before{background:var(--gold);}
+.tc.cd::before{background:var(--purple);}
+.tc.ce::before{background:var(--red);}
+.tc.cf::before{background:var(--green);}
+.tck{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--bd2);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;}
+.tck.done{background:var(--green);border-color:var(--green);}
+.ti{flex:1;}
+.tn{font-size:13px;font-weight:600;margin-bottom:3px;line-height:1.3;}
+.tn.s{text-decoration:line-through;color:var(--tx2);}
+.tw{font-size:11px;color:var(--tx2);margin-bottom:6px;font-style:italic;}
+.tm2{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:9px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:Syne,sans-serif;transition:all .15s;}
+.bp{background:var(--xp);color:#fff;}.bp:hover{background:var(--xp2);}
+.bg{background:var(--gold);color:#111;}.bg:hover{background:var(--gold2);}
+.bgh{background:transparent;color:var(--tx2);border:1px solid var(--bd2);}.bgh:hover{background:var(--bg3);color:var(--tx);}
+.br{background:rgba(255,85,85,.15);color:var(--red);border:1px solid rgba(255,85,85,.2);}
+.bsm{padding:4px 9px;font-size:11px;border-radius:7px;}
+.bfw{width:100%;justify-content:center;}
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px);}
+.mo.h{display:none;}
+.mb{background:var(--bg2);border:1px solid var(--bd2);border-radius:18px;padding:24px;max-width:460px;width:100%;}
+.mt{font-size:17px;font-weight:800;margin-bottom:6px;}
+.ms{font-size:13px;color:var(--tx2);margin-bottom:18px;line-height:1.5;}
+.mbtns{display:flex;gap:8px;}
+.mopt{background:var(--bg3);border:1px solid var(--bd);border-radius:11px;padding:12px;cursor:pointer;transition:all .15s;margin-bottom:8px;}
+.mopt:hover{border-color:var(--xp2);}
+.moptn{font-size:13px;font-weight:600;margin-bottom:4px;}
+.shopg{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:12px;}
+.si{background:var(--bg2);border:1px solid var(--bd);border-radius:14px;padding:16px;text-align:center;position:relative;transition:all .2s;cursor:pointer;}
+.si:hover:not(.lk){border-color:var(--gold2);transform:translateY(-2px);}
+.si.lk{opacity:.45;cursor:default;}
+.sico{font-size:26px;margin-bottom:8px;}
+.snm{font-size:12px;font-weight:700;margin-bottom:3px;}
+.spr{font-size:17px;font-weight:800;color:var(--gold);margin-bottom:3px;}
+.ssh{font-size:11px;color:var(--tx2);}
+.stm{font-size:10px;color:var(--tx3);margin-top:3px;font-style:italic;}
+.fb{position:absolute;top:8px;right:8px;font-size:9px;padding:2px 5px;border-radius:20px;font-weight:600;}
+.fb.fr{background:rgba(61,204,122,.12);color:var(--green);}
+.fb.fl{background:rgba(255,85,85,.12);color:var(--red);}
+.cw{display:flex;flex-direction:column;height:calc(100vh - 160px);}
+.cms{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:12px;}
+.msg{display:flex;gap:8px;max-width:85%;}
+.msg.u{margin-left:auto;flex-direction:row-reverse;}
+.mav{width:30px;height:30px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+.mav.c{background:linear-gradient(135deg,var(--xp2),var(--purple));color:#fff;}
+.mav.u{background:var(--gold);color:#111;}
+.mbbl{padding:10px 13px;border-radius:12px;font-size:13px;line-height:1.6;}
+.msg.coach .mbbl{background:var(--bg3);border:1px solid var(--bd);border-top-left-radius:3px;}
+.msg.u .mbbl{background:var(--xp2);color:#fff;border-top-right-radius:3px;}
+.ciw{padding:12px;border-top:1px solid var(--bd);display:flex;gap:8px;}
+.ci{flex:1;background:var(--bg3);border:1px solid var(--bd2);border-radius:10px;padding:9px 12px;color:var(--tx);font-family:Syne,sans-serif;font-size:13px;resize:none;height:42px;outline:none;}
+.ci:focus{border-color:var(--xp2);}
+.typing{display:flex;gap:4px;padding:3px 0;}
+.typing span{width:6px;height:6px;border-radius:50%;background:var(--tx2);animation:bl 1.2s infinite;}
+.typing span:nth-child(2){animation-delay:.2s;}
+.typing span:nth-child(3){animation-delay:.4s;}
+@keyframes bl{0%,80%,100%{opacity:.2}40%{opacity:1}}
+.na{position:fixed;bottom:20px;right:20px;z-index:300;display:flex;flex-direction:column;gap:8px;}
+.ni2{background:var(--bg2);border:1px solid var(--bd2);border-radius:12px;padding:12px 16px;font-size:12px;max-width:280px;animation:si2 .3s ease;box-shadow:0 8px 24px rgba(0,0,0,.4);}
+@keyframes si2{from{transform:translateX(80px);opacity:0}to{transform:translateX(0);opacity:1}}
+.inp{width:100%;background:var(--bg3);border:1px solid var(--bd2);border-radius:9px;padding:9px 12px;color:var(--tx);font-family:Syne,sans-serif;font-size:13px;outline:none;}
+.inp:focus{border-color:var(--xp2);}
+.ingold{color:var(--gold);font-family:'DM Mono',monospace;font-size:15px;font-weight:600;}
+.inxp{color:var(--xp);font-family:'DM Mono',monospace;font-size:15px;font-weight:600;}
+select.inp{cursor:pointer;}
+textarea.inp{resize:none;}
+.lbl{font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:5px;}
+.dbt{background:rgba(255,85,85,.07);border:1px solid rgba(255,85,85,.18);border-radius:11px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:16px;font-size:12px;}
+.pg2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.po{background:var(--bg3);border:1px solid var(--bd);border-radius:11px;padding:14px;cursor:pointer;text-align:center;transition:all .15s;}
+.po:hover{border-color:var(--red);}
+.mdbtn{font-size:20px;margin-bottom:6px;}
+.cbr{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.cbt{flex:1;height:5px;border-radius:3px;background:var(--bg3);overflow:hidden;}
+.cbf{height:100%;border-radius:3px;}
+.chartb{display:flex;align-items:flex-end;gap:6px;}
+.moodbtn{flex:1;text-align:center;font-size:22px;cursor:pointer;padding:7px;border-radius:9px;border:1px solid var(--bd);transition:all .15s;}
+.moodbtn.sel{border-color:var(--xp);background:var(--bg3);}
+.bosscard{background:linear-gradient(135deg,rgba(255,85,85,.07),rgba(155,109,255,.07));border:1px solid rgba(155,109,255,.2);border-radius:16px;padding:20px;margin-bottom:16px;}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="logo">ILAN <span>Life RPG</span></div>
+    <div class="tstats">
+      <div class="tstat">XP <b id="top-xp" style="color:var(--xp)">0</b></div>
+      <div class="tstat">⬡ <b id="top-gold" style="color:var(--gold)">0</b></div>
+      <div class="lvbadge" id="top-lv">Nv. 1</div>
+    </div>
+  </header>
+  <aside class="sidebar">
+    <div class="nsec">Navigation</div>
+    <div class="ni active" data-p="dashboard"><div class="ndot" style="background:var(--tx2)"></div>Dashboard</div>
+    <div class="ni" data-p="tasks"><div class="ndot" style="background:var(--xp)"></div>Toutes les tâches<span class="nc" id="nc-all">0</span></div>
+    <div class="ni" data-p="coach"><div class="ndot" style="background:var(--purple)"></div>Coach IA</div>
+    <div class="ni" data-p="shop"><div class="ndot" style="background:var(--gold)"></div>Boutique</div>
+    <div class="ni" data-p="soir"><div class="ndot" style="background:var(--orange)"></div>Bilan du soir</div>
+    <div class="ni" data-p="boss"><div class="ndot" style="background:var(--red)"></div>Boss du mois</div>
+    <div class="ni" data-p="calendar"><div class="ndot" style="background:var(--green)"></div>Calendrier</div>
+    <div class="ni" data-p="stats"><div class="ndot" style="background:var(--purple)"></div>Statistiques</div>
+    <div class="ni" data-p="profile"><div class="ndot" style="background:var(--green)"></div>Profil</div>
+    <div class="nsec">Catégories</div>
+    <div class="ni" data-p="tasks" data-c="addictions"><div class="ndot" style="background:var(--red)"></div>Addictions<span class="nc" id="nc-a">0</span></div>
+    <div class="ni" data-p="tasks" data-c="levelup"><div class="ndot" style="background:var(--xp)"></div>Level Up<span class="nc" id="nc-l">0</span></div>
+    <div class="ni" data-p="tasks" data-c="finance"><div class="ndot" style="background:var(--gold)"></div>Finance<span class="nc" id="nc-f">0</span></div>
+    <div class="ni" data-p="tasks" data-c="religion"><div class="ndot" style="background:var(--purple)"></div>Religion<span class="nc" id="nc-r">0</span></div>
+    <div class="ni" data-p="tasks" data-c="sante"><div class="ndot" style="background:var(--red)"></div>Santé/Sport<span class="nc" id="nc-s">0</span></div>
+    <div class="ni" data-p="tasks" data-c="social"><div class="ndot" style="background:var(--green)"></div>Social<span class="nc" id="nc-o">0</span></div>
+    <div class="nsec">Streaks actifs</div>
+    <div id="sb-streaks" style="font-size:12px;color:var(--tx2);padding:0 8px;">Aucun streak actif</div>
+  </aside>
+  <main class="main" id="main"></main>
+</div>
+<div class="na" id="na"></div>
+<div class="mo h" id="mo"><div class="mb" id="mc"></div></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════
+var G = {
+  xp:0,gold:0,level:1,
+  debtPaid:false,debtAmt:6000,debtDone:0,
+  streaks:{},chat:[],
+  weekHist:[],dayRev:[],journal:[],bosses:[],
+  notif:{morning:'08:00',evening:'20:00'},
+  page:'dashboard',cat:null,
+  dayHist:{} // {dateStr: {done, total, xp, cats}}
+};
+var AT = []; // active tasks
+var mood = '';
+
+var TASKS = [
+  // ADDICTIONS
+  {id:'a1',cat:'addictions',name:'Fumer moins de 5 cigarettes',why:'1er palier réaliste depuis 10-20 cig/jour',diff:'easy',xp:20,gold:8,type:'daily',req:null},
+  {id:'a2',cat:'addictions',name:'Journée 0 cigarette',why:'~13₪ économisés + poumons qui récupèrent',diff:'hard',xp:60,gold:25,type:'daily',req:'a1'},
+  {id:'a3',cat:'addictions',name:'3 jours sans cigarette',why:'~40₪ éco, le corps commence à récupérer',diff:'hard',xp:180,gold:70,type:'streak3',req:'a2'},
+  {id:'a4',cat:'addictions',name:'1 semaine sans cigarette',why:'~90₪ éco, focus amélioré pour Level Up',diff:'epic',xp:500,gold:200,type:'milestone',req:'a3'},
+  {id:'a5',cat:'addictions',name:'Journée sans cannabis',why:'Clarté mentale directe pour Level Up',diff:'med',xp:40,gold:15,type:'daily',req:null},
+  {id:'a6',cat:'addictions',name:'3 jours sans cannabis',why:'~100₪ éco, motivation renforcée',diff:'hard',xp:150,gold:60,type:'streak3',req:'a5'},
+  {id:'a7',cat:'addictions',name:'1 semaine sans cannabis',why:'~400₪ éco sur le mois, productivité ×2',diff:'epic',xp:400,gold:160,type:'milestone',req:'a6'},
+  // LEVEL UP
+  {id:'l1',cat:'levelup',name:'Publier 1 contenu Instagram ou TikTok',why:'1 post/jour active l\'algorithme',diff:'easy',xp:25,gold:10,type:'daily',req:null},
+  {id:'l2',cat:'levelup',name:'Publier 3 contenus cette semaine',why:'Minimum pour exister sur les réseaux',diff:'med',xp:100,gold:40,type:'weekly',req:'l1'},
+  {id:'l3',cat:'levelup',name:'Publier 5 contenus cette semaine',why:'Fréquence qui crée la croissance organique',diff:'hard',xp:200,gold:80,type:'weekly',req:'l2'},
+  {id:'l4',cat:'levelup',name:'Démarcher 1 tour commerciale avec flyers',why:'Contact direct = clients les plus rapides',diff:'med',xp:80,gold:35,type:'unique',req:null},
+  {id:'l5',cat:'levelup',name:'Vendre 10+ repas en session démarchage',why:'Revenu direct + preuve que ça se vend',diff:'hard',xp:200,gold:80,type:'unique',req:'l4'},
+  {id:'l6',cat:'levelup',name:'Lancer une campagne pub payante',why:'Levier le plus scalable pour les clients',diff:'hard',xp:180,gold:70,type:'unique',req:null},
+  {id:'l7',cat:'levelup',name:'Décrocher 1 nouveau client récurrent',why:'Revenu récurrent = base stable Level Up',diff:'hard',xp:300,gold:120,type:'unique',req:null},
+  {id:'l8',cat:'levelup',name:'Atteindre 5 clients actifs',why:'~2 500₪/mois garantis Level Up',diff:'epic',xp:500,gold:200,type:'milestone',req:'l7'},
+  {id:'l9',cat:'levelup',name:'Atteindre 15 clients actifs',why:'Level Up commence à dépasser Wolt',diff:'epic',xp:1000,gold:400,type:'milestone',req:'l8'},
+  {id:'l10',cat:'levelup',name:'Préparer et livrer une commande Level Up',why:'Chaque livraison = revenu + client fidélisé',diff:'easy',xp:30,gold:12,type:'daily',req:null},
+  // FINANCE
+  {id:'f7',cat:'finance',name:'Tenir un budget écrit cette semaine',why:'Conscience = 1er pas pour contrôler les fuites',diff:'easy',xp:20,gold:8,type:'weekly',req:null},
+  {id:'f1',cat:'finance',name:'Journée sans achat impulsif',why:'~20-50₪ éco, 600₪+/mois si tenu',diff:'easy',xp:15,gold:6,type:'daily',req:null},
+  {id:'f2',cat:'finance',name:'Semaine sans achat impulsif',why:'~200-300₪ économisés sur la semaine',diff:'hard',xp:120,gold:50,type:'weekly',req:'f1'},
+  {id:'f3',cat:'finance',name:'Rembourser 500₪ de dette',why:'Dettes effacées en 3 mois à ce rythme',diff:'med',xp:100,gold:40,type:'monthly',req:'f7'},
+  {id:'f4',cat:'finance',name:'Rembourser 1 500₪ de dette',why:'Dettes effacées en 1 mois si répété',diff:'hard',xp:250,gold:100,type:'unique',req:'f3'},
+  {id:'f5',cat:'finance',name:'Mettre 500₪ en épargne',why:'Base pour atteindre 10 000₪',diff:'med',xp:80,gold:30,type:'monthly',req:'f3'},
+  {id:'f6',cat:'finance',name:'Mettre 2 000₪ en épargne',why:'Possible si addictions + achats coupés',diff:'epic',xp:400,gold:160,type:'monthly',req:'f5'},
+  // RELIGION
+  {id:'r1',cat:'religion',name:'Mettre les tephilines aujourd\'hui',why:'Reprendre la routine après la blessure',diff:'easy',xp:20,gold:8,type:'daily',req:null},
+  {id:'r2',cat:'religion',name:'Tephilines 5 jours consécutifs',why:'Routine réinstallée = ancrage de la journée',diff:'med',xp:120,gold:50,type:'streak5',req:'r1'},
+  {id:'r3',cat:'religion',name:'Tephilines 1 mois complet',why:'Discipline spirituelle = discipline partout',diff:'epic',xp:600,gold:250,type:'milestone',req:'r2'},
+  {id:'r4',cat:'religion',name:'Cours de Torah cette semaine',why:'Apprentissage + lien communautaire',diff:'easy',xp:30,gold:12,type:'weekly',req:null},
+  {id:'r5',cat:'religion',name:'Faire Shabbat complet',why:'Déconnexion totale = rechargement mental',diff:'epic',xp:400,gold:160,type:'weekly',req:'r1'},
+  {id:'r6',cat:'religion',name:'4 Shabbats consécutifs',why:'L\'objectif absolu que tu t\'es fixé',diff:'epic',xp:1200,gold:500,type:'milestone',req:'r5'},
+  // SANTE
+  {id:'s5',cat:'sante',name:'Dormir avant minuit',why:'Ton manque de routine vient du sommeil',diff:'med',xp:30,gold:12,type:'daily',req:null},
+  {id:'s6',cat:'sante',name:'Se lever avant 8h',why:'Tephilines + Level Up avant Wolt',diff:'hard',xp:50,gold:20,type:'daily',req:'s5'},
+  {id:'s1',cat:'sante',name:'Session tennis (2h+)',why:'Ta force — maintenir la régularité',diff:'easy',xp:25,gold:10,type:'daily',req:null},
+  {id:'s2',cat:'sante',name:'Session muscu complète',why:'Force physique = énergie pour tout',diff:'easy',xp:25,gold:10,type:'daily',req:null},
+  {id:'s3',cat:'sante',name:'Session foot',why:'Sport + social combinés',diff:'easy',xp:20,gold:8,type:'daily',req:null},
+  {id:'s4',cat:'sante',name:'5 séances sport cette semaine',why:'Ton niveau actuel — le maintenir',diff:'med',xp:100,gold:40,type:'weekly',req:null},
+  {id:'s7',cat:'sante',name:'Journée alimentation rigoureuse',why:'Tu cuisines pour tes clients — applique-le à toi',diff:'med',xp:30,gold:12,type:'daily',req:null},
+  // SOCIAL
+  {id:'o1',cat:'social',name:'Parler de Level Up à 3 personnes',why:'Ton réseau = premiers clients potentiels',diff:'easy',xp:30,gold:12,type:'weekly',req:null},
+  {id:'o2',cat:'social',name:'Convertir 1 ami en client Level Up',why:'Bouche à oreille = meilleur canal marketing',diff:'hard',xp:200,gold:80,type:'unique',req:'o1'},
+  {id:'o3',cat:'social',name:'Appeler un membre de ta famille',why:'Ancrage émotionnel dans les périodes intenses',diff:'easy',xp:15,gold:6,type:'weekly',req:null},
+  {id:'o4',cat:'social',name:'Moment de qualité avec la fille que tu vois',why:'Équilibre vie perso / travail',diff:'easy',xp:20,gold:8,type:'weekly',req:null},
+];
+
+var SHOP = [
+  {id:'sh1',name:'Sortie cinéma',icon:'🎬',price:60,shekel:'~50₪',time:'4-5 jours sérieux',free:true},
+  {id:'sh2',name:'Journée off complète',icon:'😴',price:80,shekel:'Sans culpabilité',time:'~1 semaine sérieuse',free:true},
+  {id:'sh3',name:'Sortie restaurant',icon:'🍽️',price:130,shekel:'~100-150₪',time:'~10 jours sérieux',free:true},
+  {id:'sh4',name:'Sortie avec une fille',icon:'💫',price:200,shekel:'~200₪',time:'~2 semaines sérieuses',free:false},
+  {id:'sh5',name:'Soirée entre amis',icon:'🥂',price:250,shekel:'~300₪',time:'~3 semaines sérieuses',free:false},
+  {id:'sh6',name:'Shopping 200₪',icon:'🛍️',price:220,shekel:'200₪ budget',time:'~2.5 semaines sérieuses',free:false},
+  {id:'sh7',name:'Shopping 400₪',icon:'👕',price:400,shekel:'400₪ budget',time:'~1 mois sérieux',free:false},
+  {id:'sh8',name:'Achat tech / gadget',icon:'📱',price:450,shekel:'~400-600₪',time:'~1.5 mois sérieux',free:false},
+  {id:'sh9',name:'Weekend 1 000₪',icon:'🏖️',price:700,shekel:'1 000₪ budget',time:'~2 mois sérieux',free:false},
+  {id:'sh10',name:'Voyage 1 500₪',icon:'✈️',price:1000,shekel:'1 500₪ budget',time:'~3 mois sérieux',free:false},
+  {id:'sh11',name:'Voyage 2 000₪',icon:'🌍',price:1300,shekel:'2 000₪ budget',time:'~4 mois sérieux',free:false},
+];
+
+var LVS = [
+  {n:1,title:'Débutant',next:500},
+  {n:2,title:'En mouvement',next:1500},
+  {n:3,title:'Discipliné',next:3000},
+  {n:4,title:'Entrepreneur',next:6000},
+  {n:5,title:'Level Up dominant 🏆',next:99999},
+];
+
+// ═══════════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════════
+function lv() {
+  var cur = LVS[0];
+  for (var i = 0; i < LVS.length - 1; i++) {
+    if (G.xp >= LVS[i+1].next) cur = LVS[i+1];
+    else { cur = LVS[i]; break; }
+  }
+  return cur;
+}
+function lvProg() {
+  var l = lv(), ni = Math.min(LVS.findIndex(function(x){return x.n===l.n;})+1, LVS.length-1);
+  var nxt = LVS[ni];
+  if (l.n === nxt.n) return 100;
+  return Math.min(100, Math.round(((G.xp - l.next) / (nxt.next - l.next)) * 100));
+}
+function cc(c) { return {addictions:'ca',levelup:'cb',finance:'cc',religion:'cd',sante:'ce',social:'cf'}[c]||''; }
+function ccolor(c) { return {addictions:'var(--red)',levelup:'var(--xp)',finance:'var(--gold)',religion:'var(--purple)',sante:'var(--red)',social:'var(--green)'}[c]||'var(--tx2)'; }
+function cname(c) { return {addictions:'Addictions',levelup:'Level Up',finance:'Finance',religion:'Religion',sante:'Santé',social:'Social'}[c]||c; }
+function dtag(d) { var m={easy:['Facile','te'],med:['Moyen','tm'],hard:['Difficile','th'],epic:['Épique','tp']}; var x=m[d]||['?','']; return '<span class="tag '+x[1]+'">'+x[0]+'</span>'; }
+function tlabel(t) { return {daily:'Quotidien',weekly:'Hebdo',monthly:'Mensuel',streak3:'Streak 3j',streak5:'Streak 5j',milestone:'Milestone',unique:'Unique'}[t]||t; }
+function pgold(d) { return {easy:10,med:25,hard:50,epic:100}[d]||10; }
+function smult(cat) { var s=G.streaks[cat]; if(!s||!s.count) return 1; if(s.count>=30) return 3; if(s.count>=14) return 2; if(s.count>=7) return 1.5; if(s.count>=3) return 1.25; return 1; }
+function unlocked(t) { if (!t.req) return true; var r = AT.find(function(x){return x.id===t.req;}); return r ? r.done : true; }
+function reqName(t) { if (!t.req) return ''; var r = AT.find(function(x){return x.id===t.req;}); return r ? r.name : ''; }
+function wkey() { var d=new Date(),j=new Date(d.getFullYear(),0,1),w=Math.ceil(((d-j)/86400000+j.getDay()+1)/7); return d.getFullYear()+'-W'+w; }
+
+// ═══════════════════════════════════════════════════════════
+// SAVE / LOAD
+// ═══════════════════════════════════════════════════════════
+var SK = 'ilan_rpg_v4';
+function save() {
+  try {
+    localStorage.setItem(SK, JSON.stringify({
+      xp:G.xp, gold:G.gold, level:G.level,
+      debtPaid:G.debtPaid, debtDone:G.debtDone,
+      streaks:G.streaks, chat:G.chat.slice(-40),
+      weekHist:G.weekHist, dayRev:G.dayRev,
+      journal:G.journal, bosses:G.bosses,
+      notif:G.notif, dayHist:G.dayHist, savedDate:new Date().toDateString(),
+      tasks:AT.map(function(t){return {id:t.id,done:t.done,added:t.added};})
+    }));
+  } catch(e) {}
+}
+function load() {
+  try {
+    var raw = localStorage.getItem(SK);
+    if (!raw) return;
+    var d = JSON.parse(raw);
+    G.xp=d.xp||0; G.gold=d.gold||0; G.level=d.level||1;
+    G.debtPaid=d.debtPaid||false; G.debtDone=d.debtDone||0;
+    G.streaks=d.streaks||{}; G.chat=d.chat||[];
+    G.weekHist=d.weekHist||[]; G.dayRev=d.dayRev||[];
+    G.journal=d.journal||[];
+    G.bosses=d.bosses&&d.bosses.length ? d.bosses : defBosses();
+    G.notif=d.notif||{morning:'08:00',evening:'20:00'};
+    G.dayHist=d.dayHist||{};
+    var isNew = d.savedDate !== new Date().toDateString();
+    if (d.tasks && d.tasks.length) {
+      AT = d.tasks.map(function(s) {
+        var base = TASKS.find(function(t){return t.id===s.id;});
+        if (!base) return null;
+        return obj(base, {done: isNew ? false : (s.done||false), added: s.added||Date.now()});
+      }).filter(Boolean);
+    }
+    if (isNew) setTimeout(function(){ notif('☀️ <b>Nouveau jour !</b> Tes tâches sont réinitialisées.','xp'); }, 600);
+  } catch(e) { console.warn(e); }
+}
+window.addEventListener('beforeunload', save);
+function obj(base, extra) { var r={}; for(var k in base) r[k]=base[k]; for(var k in extra) r[k]=extra[k]; return r; }
+
+// ═══════════════════════════════════════════════════════════
+// BOSSES
+// ═══════════════════════════════════════════════════════════
+function defBosses() {
+  var end = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).toDateString();
+  return [{id:'b1',title:'Décrocher 3 nouveaux clients Level Up',desc:'Transforme 3 prospects en clients récurrents ce mois-ci.',xp:1500,gold:600,penalty:150,deadline:end,done:false,failed:false,progress:0,target:3}];
+}
+
+// ═══════════════════════════════════════════════════════════
+// NOTIFY
+// ═══════════════════════════════════════════════════════════
+function notif(msg, type) {
+  var el = document.getElementById('na');
+  var d = document.createElement('div');
+  d.className = 'ni2';
+  d.style.borderColor = type==='level'?'rgba(155,109,255,.3)':type==='gold'?'rgba(245,200,66,.3)':'rgba(74,158,255,.3)';
+  d.innerHTML = msg;
+  el.appendChild(d);
+  setTimeout(function(){d.remove();}, 4000);
+}
+
+// ═══════════════════════════════════════════════════════════
+// STREAKS
+// ═══════════════════════════════════════════════════════════
+function updStreak(cat) {
+  var today=new Date().toDateString(), yest=new Date(Date.now()-86400000).toDateString();
+  if (!G.streaks[cat]) G.streaks[cat]={count:0,lastDate:null};
+  var s=G.streaks[cat];
+  if (s.lastDate===today) return;
+  s.count = s.lastDate===yest ? s.count+1 : 1;
+  s.lastDate = today;
+}
+
+// ═══════════════════════════════════════════════════════════
+// TOP BAR
+// ═══════════════════════════════════════════════════════════
+function updTop() {
+  document.getElementById('top-xp').textContent = G.xp.toLocaleString();
+  document.getElementById('top-gold').textContent = G.gold;
+  document.getElementById('top-lv').textContent = 'Nv. ' + lv().n;
+  var p = AT.filter(function(t){return !t.done;});
+  function cn(c){return c?p.filter(function(t){return t.cat===c;}).length:p.length;}
+  document.getElementById('nc-all').textContent=cn();
+  document.getElementById('nc-a').textContent=cn('addictions');
+  document.getElementById('nc-l').textContent=cn('levelup');
+  document.getElementById('nc-f').textContent=cn('finance');
+  document.getElementById('nc-r').textContent=cn('religion');
+  document.getElementById('nc-s').textContent=cn('sante');
+  document.getElementById('nc-o').textContent=cn('social');
+  var sa=Object.entries(G.streaks).filter(function(e){return e[1].count>0;});
+  var el=document.getElementById('sb-streaks');
+  el.innerHTML = sa.length ? sa.map(function(e){return '<div style="display:flex;justify-content:space-between;padding:3px 0;font-size:11px;"><span>'+cname(e[0])+'</span><span style="color:var(--orange)">🔥 '+e[1].count+'j</span></div>';}).join('') : 'Aucun streak actif';
+}
+
+// ═══════════════════════════════════════════════════════════
+// ROUTING
+// ═══════════════════════════════════════════════════════════
+function go(page, cat) {
+  G.page = page;
+  G.cat = (cat !== undefined) ? cat : (page==='tasks' ? G.cat : null);
+  document.querySelectorAll('.ni').forEach(function(n){n.classList.remove('active');});
+  var sel = cat ? document.querySelector('[data-p="'+page+'"][data-c="'+cat+'"]') : document.querySelector('[data-p="'+page+'"]:not([data-c])');
+  if (sel) sel.classList.add('active');
+  draw();
+}
+function draw() {
+  var m = document.getElementById('main');
+  var fns = {dashboard:pgDash, tasks:pgTasks, coach:pgCoach, shop:pgShop, soir:pgSoir, boss:pgBoss, calendar:pgCalendar, stats:pgStats, profile:pgProfile};
+  var fn = fns[G.page];
+  m.innerHTML = fn ? fn() : '';
+  if (G.page==='coach') initCoach();
+  if (G.page==='calendar') {
+    document.querySelectorAll('.cal-day').forEach(function(el) {
+      el.addEventListener('click', function() {
+        var d = el.getAttribute('data-date');
+        if (d && G.dayHist[d]) showDayDetail(d);
+      });
+      el.addEventListener('mouseover', function() { el.style.transform='scale(1.15)'; });
+      el.addEventListener('mouseout', function() { el.style.transform='scale(1)'; });
+    });
+  }
+  updTop();
+}
+
+// ═══════════════════════════════════════════════════════════
+// TASK CARD
+// ═══════════════════════════════════════════════════════════
+function tcard(t, showFail) {
+  var ok = unlocked(t);
+  if (!ok) {
+    var rn = reqName(t).substring(0,50);
+    var h = '<div class="tc '+cc(t.cat)+'" style="opacity:.3;">';
+    h += '<div class="tck" style="font-size:11px;cursor:default;">🔒</div>';
+    h += '<div class="ti">';
+    h += '<div class="tn" style="color:var(--tx2);">'+t.name+'</div>';
+    h += '<div class="tw" style="color:var(--tx3);">🔒 Complète d\'abord : '+rn+'</div>';
+    h += '<div class="tm2">'+dtag(t.diff)+'<span class="tag tx">+'+t.xp+' XP</span><span class="tag tg">+'+t.gold+' ⬡</span></div>';
+    h += '</div></div>';
+    return h;
+  }
+  var age = Math.round((Date.now()-t.added)/86400000);
+  var ageW = age>=3 ? '<span style="font-size:10px;color:var(--red);">⏳ '+age+'j</span>' : '';
+  var mult = smult(t.cat);
+  var sTag = mult>1 ? '<span class="sbadge">🔥 ×'+mult+'</span>' : '';
+  var h = '<div class="tc '+cc(t.cat)+'">';
+  h += '<div class="tck'+(t.done?' done':'')+'" onclick="askDone(\''+t.id+'\')">';
+  if (t.done) h += '<svg width="11" height="11" viewBox="0 0 11 11"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>';
+  h += '</div>';
+  h += '<div class="ti">';
+  h += '<div class="tn'+(t.done?' s':'')+'">'+t.name+'</div>';
+  h += '<div class="tw">'+t.why+'</div>';
+  h += '<div class="tm2">'+dtag(t.diff)+'<span class="tag tx">+'+t.xp+' XP</span><span class="tag tg">+'+t.gold+' ⬡</span><span class="tag tt">'+tlabel(t.type)+'</span>'+sTag+ageW+'</div>';
+  h += '</div>';
+  if (showFail && !t.done) h += '<button class="btn br bsm" onclick="failT(\''+t.id+'\')">Raté</button>';
+  h += '</div>';
+  return h;
+}
+
+// ═══════════════════════════════════════════════════════════
+// COMPLETE TASK
+// ═══════════════════════════════════════════════════════════
+function askDone(id) {
+  var t = AT.find(function(x){return x.id===id;});
+  if (!t || t.done) return;
+  if (!unlocked(t)) { notif('🔒 Complète d\'abord : <b>'+reqName(t).substring(0,40)+'</b>','xp'); return; }
+  var mult=smult(t.cat), xpG=Math.round(t.xp*mult);
+  showM(
+    '<div class="mt">✅ Confirmer</div>'+
+    '<div class="ms">Tu as bien accompli :<br><b>'+t.name+'</b></div>'+
+    '<div style="background:var(--bg3);border-radius:10px;padding:12px;display:flex;gap:12px;justify-content:center;margin-bottom:18px;">'+
+    '<span class="tag tx" style="font-size:13px;padding:6px 12px;">+'+xpG+' XP'+(mult>1?' 🔥×'+mult:'')+'</span>'+
+    '<span class="tag tg" style="font-size:13px;padding:6px 12px;">+'+t.gold+' ⬡</span>'+
+    '</div>'+
+    '<div class="mbtns">'+
+    '<button class="btn bgh" style="flex:1" onclick="closeM()">Annuler</button>'+
+    '<button class="btn bp" style="flex:1" onclick="doComplete(\''+id+'\')">Oui, accompli !</button>'+
+    '</div>'
+  );
+}
+function doComplete(id) {
+  var t = AT.find(function(x){return x.id===id;});
+  if (!t) return;
+  closeM();
+  var mult=smult(t.cat), xpG=Math.round(t.xp*mult), prevLv=lv().n;
+  G.xp+=xpG; G.gold+=t.gold; t.done=true;
+  updStreak(t.cat);
+  // Daily snapshot
+  var tod=new Date().toDateString();
+  var dsnap=G.dayHist[tod]||{done:0,total:AT.length,xp:0,cats:{}};
+  dsnap.done=AT.filter(function(x){return x.done;}).length;
+  dsnap.total=AT.length;
+  dsnap.xp=(dsnap.xp||0)+xpG;
+  dsnap.cats[t.cat]=(dsnap.cats[t.cat]||0)+1;
+  G.dayHist[tod]=dsnap;
+  // Weekly snapshot
+  var wk=wkey(), we=G.weekHist.find(function(w){return w.week===wk;});
+  if (we) { we.xp=G.xp; we.gold=G.gold; we.done=Math.max(we.done||0, AT.filter(function(x){return x.done;}).length); }
+  else G.weekHist.push({week:wk,xp:G.xp,gold:G.gold,done:1});
+  if (G.weekHist.length>12) G.weekHist.shift();
+  save();
+  notif('✅ <b>'+t.name.substring(0,35)+'</b><br>+'+xpG+' XP'+(mult>1?' (×'+mult+')':'')+'  +'+t.gold+' Gold','xp');
+  if (lv().n > prevLv) setTimeout(function(){notif('🎉 <b>NIVEAU '+lv().n+' !</b> '+lv().title,'level');},400);
+  if (t.type==='unique') setTimeout(function(){showReplace(t);},700);
+  draw();
+}
+function failT(id) {
+  var t = AT.find(function(x){return x.id===id;});
+  if (!t) return;
+  var gl = pgold(t.diff);
+  showM(
+    '<div class="mt">⚡ Tâche ratée</div>'+
+    '<div class="ms">Tu as raté :<br><b>'+t.name+'</b><br>Choisis ta punition :</div>'+
+    '<div class="pg2">'+
+    '<div class="po" onclick="applyP(\'task\',\''+id+'\')"><div class="mdbtn">💪</div><div style="font-size:12px;font-weight:700;">Tâche de rachat</div><div style="font-size:11px;color:var(--tx2);">Mission difficile maintenant</div></div>'+
+    '<div class="po" onclick="applyP(\'gold\',\''+id+'\','+gl+')"><div class="mdbtn">💸</div><div style="font-size:12px;font-weight:700;">Perte de Gold</div><div style="font-size:11px;color:var(--tx2);">−'+gl+' Gold</div></div>'+
+    '</div>'+
+    '<button class="btn bgh bfw" onclick="closeM()">Annuler</button>'
+  );
+}
+function applyP(type, id, gl) {
+  if (type==='gold') { G.gold=Math.max(0,G.gold-(gl||10)); notif('💸 Punition : −'+(gl||10)+' Gold','gold'); }
+  else notif('💪 Rachat : 30 pompes ou 15 min de méditation !','xp');
+  var t=AT.find(function(x){return x.id===id;});
+  if (t && G.streaks[t.cat]) G.streaks[t.cat].count=0;
+  save(); closeM(); draw();
+}
+function showReplace(done) {
+  var opts = TASKS.filter(function(t){return t.cat===done.cat&&t.id!==done.id;}).sort(function(){return Math.random()-.5;}).slice(0,3);
+  var h = '<div class="mt">🔄 Tâche unique accomplie !</div><div class="ms">Choisis sa remplaçante :</div>';
+  opts.forEach(function(t) {
+    h += '<div class="mopt" onclick="replaceT(\''+done.id+'\',\''+t.id+'\')">';
+    h += '<div class="moptn">'+t.name+'</div>';
+    h += '<div style="display:flex;gap:6px;">'+dtag(t.diff)+'<span class="tag tx">+'+t.xp+'</span><span class="tag tg">+'+t.gold+'</span></div>';
+    h += '</div>';
+  });
+  h += '<button class="btn bgh bfw" onclick="closeM()">Plus tard</button>';
+  showM(h);
+}
+function replaceT(oldId, newId) {
+  var idx=AT.findIndex(function(t){return t.id===oldId;}), base=TASKS.find(function(t){return t.id===newId;});
+  if (idx>=0&&base) { AT[idx]=obj(base,{done:false,added:Date.now()}); notif('🆕 Nouvelle tâche ajoutée','xp'); }
+  save(); closeM(); draw();
+}
+
+// ═══════════════════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════════════════
+function showM(html) { document.getElementById('mc').innerHTML=html; document.getElementById('mo').classList.remove('h'); }
+function closeM() { document.getElementById('mo').classList.add('h'); }
+document.getElementById('mo').addEventListener('click', function(e){ if(e.target===this) closeM(); });
+
+// ═══════════════════════════════════════════════════════════
+// SHOP
+// ═══════════════════════════════════════════════════════════
+function buyM(item) {
+  var locked = !item.free && !G.debtPaid;
+  if (locked) { showM('<div class="mt">🔒 Bloquée</div><div class="ms">Rembourse tes 6 000₪ de dettes d\'abord pour débloquer cette récompense.</div><button class="btn bp bfw" onclick="closeM()">OK</button>'); return; }
+  if (G.gold<item.price) { showM('<div class="mt">⬡ Gold insuffisant</div><div class="ms">Il te faut <b>'+item.price+' Gold</b>. Tu en as <b>'+G.gold+'</b>.</div><button class="btn bp bfw" onclick="closeM()">OK</button>'); return; }
+  showM('<div class="mt">'+item.icon+' Acheter ?</div><div class="ms"><b>'+item.name+'</b> — '+item.shekel+'<br>Coût : <b style="color:var(--gold)">'+item.price+' Gold</b><br>Il te restera '+(G.gold-item.price)+' Gold.</div><div class="mbtns"><button class="btn bgh" style="flex:1" onclick="closeM()">Annuler</button><button class="btn bg" style="flex:1" onclick="doBuy(\''+item.id+'\')">Confirmer</button></div>');
+}
+function doBuy(id) {
+  var item=SHOP.find(function(i){return i.id===id;});
+  if (!item) return;
+  G.gold-=item.price; save(); notif('🎉 <b>'+item.name+'</b> débloquée ! Profite bien, Ilan.','gold'); closeM(); draw();
+}
+
+// ═══════════════════════════════════════════════════════════
+// DEBT
+// ═══════════════════════════════════════════════════════════
+function showDebt() {
+  showM('<div class="mt">💳 Mettre à jour les dettes</div><div class="ms">Combien as-tu remboursé en tout ?</div><input id="di" type="number" class="inp" placeholder="Ex: 1500" style="margin-bottom:16px"><div class="mbtns"><button class="btn bgh" style="flex:1" onclick="closeM()">Annuler</button><button class="btn bp" style="flex:1" onclick="updDebt()">Confirmer</button></div>');
+}
+function updDebt() {
+  var v=parseInt(document.getElementById('di').value)||0;
+  G.debtDone=Math.min(v,G.debtAmt);
+  if (G.debtDone>=G.debtAmt) { G.debtPaid=true; notif('🎉 <b>Dettes remboursées !</b> Boutique complète débloquée !','level'); }
+  save(); closeM(); draw();
+}
+
+// ═══════════════════════════════════════════════════════════
+// ADD CUSTOM TASK
+// ═══════════════════════════════════════════════════════════
+function showAddT() {
+  var h = '<div class="mt">➕ Nouvelle tâche</div>';
+  h += '<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:18px;">';
+  h += '<div><label class="lbl">Nom *</label><input id="ct-n" class="inp" placeholder="Ex: Appeler mon comptable" maxlength="100"></div>';
+  h += '<div><label class="lbl">Pourquoi ?</label><input id="ct-w" class="inp" placeholder="Ex: Garder mes comptes à jour" maxlength="100"></div>';
+  h += '<div class="g2"><div><label class="lbl">Catégorie</label><select id="ct-c" class="inp"><option value="levelup">🚀 Level Up</option><option value="finance">💰 Finance</option><option value="sante">❤️ Santé</option><option value="addictions">🚬 Addictions</option><option value="religion">✨ Religion</option><option value="social">👥 Social</option></select></div>';
+  h += '<div><label class="lbl">Difficulté</label><select id="ct-d" class="inp" onchange="setXP()"><option value="easy">Facile</option><option value="med">Moyen</option><option value="hard">Difficile</option><option value="epic">Épique</option></select></div></div>';
+  h += '<div class="g3"><div><label class="lbl">XP</label><input id="ct-x" type="number" class="inp inxp" value="20" min="5" max="1500"></div><div><label class="lbl">Gold</label><input id="ct-g" type="number" class="inp ingold" value="8" min="2" max="600"></div><div><label class="lbl">Type</label><select id="ct-t" class="inp"><option value="daily">Quotidien</option><option value="weekly">Hebdo</option><option value="monthly">Mensuel</option><option value="unique">Unique</option></select></div></div>';
+  h += '</div>';
+  h += '<div class="mbtns"><button class="btn bgh" style="flex:1" onclick="closeM()">Annuler</button><button class="btn bp" style="flex:1" onclick="createT()">Créer</button></div>';
+  showM(h);
+}
+function setXP() {
+  var d=document.getElementById('ct-d').value;
+  document.getElementById('ct-x').value={easy:20,med:40,hard:100,epic:300}[d];
+  document.getElementById('ct-g').value={easy:8,med:16,hard:40,epic:120}[d];
+}
+function createT() {
+  var n=(document.getElementById('ct-n').value||'').trim();
+  if (!n) { document.getElementById('ct-n').style.borderColor='var(--red)'; return; }
+  AT.push({id:'c_'+Date.now(),cat:document.getElementById('ct-c').value,name:n,why:(document.getElementById('ct-w').value||'').trim()||'Tâche personnalisée',diff:document.getElementById('ct-d').value,xp:parseInt(document.getElementById('ct-x').value)||20,gold:parseInt(document.getElementById('ct-g').value)||8,type:document.getElementById('ct-t').value,req:null,done:false,added:Date.now(),custom:true});
+  save(); closeM(); notif('✅ Tâche créée : <b>'+n+'</b>','xp'); draw();
+}
+
+// ═══════════════════════════════════════════════════════════
+// REVENUE & JOURNAL
+// ═══════════════════════════════════════════════════════════
+function saveRev() {
+  var w=parseInt(document.getElementById('rv-w').value)||0, l=parseInt(document.getElementById('rv-l').value)||0;
+  var today=new Date().toDateString(), entry={date:today,wolt:w,levelup:l,total:w+l};
+  var idx=G.dayRev.findIndex(function(e){return e.date===today;});
+  if (idx>=0) G.dayRev[idx]=entry; else G.dayRev.push(entry);
+  if (G.dayRev.length>90) G.dayRev.shift();
+  var bonus=10+(l>0?20:0)+(l>w?50:0);
+  G.xp+=bonus; G.gold+=5; save();
+  if (l>w) notif('🏆 <b>Level Up > Wolt aujourd\'hui !</b> +'+bonus+' XP !','level');
+  else notif('💰 Revenus : '+(w+l)+'₪  +'+bonus+' XP','xp');
+  draw();
+}
+function setMood(m) {
+  mood=m;
+  document.querySelectorAll('.moodbtn').forEach(function(b){b.classList.toggle('sel',b.dataset.m===m);});
+}
+function saveJournal() {
+  var txt=(document.getElementById('jt').value||'').trim(), today=new Date().toDateString();
+  var entry={date:today,text:txt,mood:mood||'🙂'};
+  var idx=G.journal.findIndex(function(e){return e.date===today;});
+  if (idx>=0) G.journal[idx]=entry; else G.journal.push(entry);
+  if (G.journal.length>90) G.journal.shift();
+  G.xp+=15; G.gold+=5; save(); notif('📝 Journal enregistré ! +15 XP','xp'); updTop();
+}
+
+// ═══════════════════════════════════════════════════════════
+// BOSS
+// ═══════════════════════════════════════════════════════════
+function updBoss(id) {
+  showM('<div class="mt">➕ Progression</div><div class="ms">Combien d\'unités as-tu accompli ?</div><input id="bpi" type="number" class="inp" value="1" min="0" style="margin-bottom:16px"><div class="mbtns"><button class="btn bgh" style="flex:1" onclick="closeM()">Annuler</button><button class="btn bp" style="flex:1" onclick="saveBP(\''+id+'\')">Confirmer</button></div>');
+}
+function saveBP(id) {
+  var v=parseInt(document.getElementById('bpi').value)||0, b=G.bosses.find(function(x){return x.id===id;});
+  if (!b) return;
+  b.progress=Math.min((b.progress||0)+v,b.target);
+  if (b.progress>=b.target) { closeM(); doneBoss(id); return; }
+  notif('⚔️ Boss : '+b.progress+'/'+b.target,'xp'); save(); closeM(); draw();
+}
+function doneBoss(id) {
+  var b=G.bosses.find(function(x){return x.id===id;});
+  if (!b||b.done) return;
+  b.done=true; b.progress=b.target; G.xp+=b.xp; G.gold+=b.gold;
+  save(); notif('🏆 <b>BOSS VAINCU !</b> +'+b.xp+' XP  +'+b.gold+' Gold','level'); closeM(); draw();
+}
+function createBoss() {
+  var title=(document.getElementById('bt').value||'').trim();
+  if (!title) { document.getElementById('bt').style.borderColor='var(--red)'; return; }
+  var end=new Date(new Date().getFullYear(),new Date().getMonth()+1,0).toDateString();
+  G.bosses.push({id:'b_'+Date.now(),title:title,desc:(document.getElementById('bd').value||'').trim(),xp:parseInt(document.getElementById('bx').value)||1000,gold:parseInt(document.getElementById('bg').value)||400,penalty:Math.round((parseInt(document.getElementById('bg').value)||400)*.25),deadline:end,done:false,failed:false,progress:0,target:parseInt(document.getElementById('btar').value)||3});
+  save(); notif('⚔️ Nouveau Boss créé !','xp'); draw();
+}
+
+// ═══════════════════════════════════════════════════════════
+// PAGE BUILDERS
+// ═══════════════════════════════════════════════════════════
+function pgDash() {
+  var l=lv(), p=lvProg();
+  var done=AT.filter(function(t){return t.done;}), pend=AT.filter(function(t){return !t.done;});
+  var daily=pend.filter(function(t){return t.type==='daily'&&unlocked(t);}).slice(0,5);
+  var dp=Math.round((G.debtDone/G.debtAmt)*100);
+  var h='<div class="ptitle">Bonjour, Ilan 👋</div><div class="psub">Niveau '+l.n+' — '+l.title+'</div>';
+  h+='<div style="display:flex;gap:8px;margin-bottom:16px;">';
+  h+='<button class="btn bgh" style="flex:1;justify-content:center;" onclick="go(\'soir\')">🌙 Bilan du soir</button>';
+  h+='<button class="btn bgh" style="flex:1;justify-content:center;" onclick="go(\'boss\')">⚔️ Boss du mois</button>';
+  h+='<button class="btn bgh" style="flex:1;justify-content:center;" onclick="showAddT()">➕ Tâche</button>';
+  h+='</div>';
+  if (!G.debtPaid) {
+    h+='<div class="dbt"><span style="font-size:16px;">💳</span><div style="flex:1"><div style="font-weight:600;margin-bottom:3px;">Dettes : '+G.debtDone+'₪ / '+G.debtAmt+'₪</div><div class="xbar"><div class="xfill" style="width:'+dp+'%;background:linear-gradient(90deg,var(--red),var(--orange))"></div></div></div><button class="btn bgh bsm" onclick="showDebt()">Mettre à jour</button></div>';
+  } else {
+    h+='<div style="background:rgba(61,204,122,.07);border:1px solid rgba(61,204,122,.2);border-radius:11px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--green);font-weight:600;">✅ Dettes remboursées — Boutique complète débloquée !</div>';
+  }
+  h+='<div class="g3" style="margin-bottom:18px;">';
+  h+='<div class="csm" style="text-align:center"><div class="snum" style="color:var(--xp)">'+G.xp.toLocaleString()+'</div><div class="slbl">XP total</div><div class="xbar"><div class="xfill" style="width:'+p+'%"></div></div><div class="slbl" style="margin-top:3px">'+p+'% → Nv.'+(l.n+1)+'</div></div>';
+  h+='<div class="csm" style="text-align:center"><div class="snum" style="color:var(--gold)">'+G.gold+'</div><div class="slbl">Gold</div><div style="font-size:10px;color:var(--tx3);margin-top:4px">Boutique dès 60</div></div>';
+  h+='<div class="csm" style="text-align:center"><div class="snum" style="color:var(--green)">'+done.length+'/'+AT.length+'</div><div class="slbl">Tâches du jour</div><div class="xbar" style="margin-top:5px"><div class="xfill" style="width:'+Math.round((done.length/Math.max(AT.length,1))*100)+'%;background:linear-gradient(90deg,var(--green),rgba(61,204,122,.4))"></div></div></div>';
+  h+='</div>';
+  h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;"><div class="stitle" style="margin:0">Tâches prioritaires</div><button class="btn bgh bsm" onclick="showAddT()">➕</button></div>';
+  if (daily.length) { h+=daily.map(function(t){return tcard(t,false);}).join(''); }
+  else h+='<div style="color:var(--tx2);font-size:13px;padding:14px 0;">🎉 Toutes les tâches quotidiennes sont complétées !</div>';
+  if (done.length) {
+    h+='<div class="stitle">Accompli aujourd\'hui ✅</div>';
+    h+=done.map(function(t){return '<div class="tc '+cc(t.cat)+'" style="opacity:.4;"><div class="tck done"><svg width="11" height="11" viewBox="0 0 11 11"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div><div class="ti"><div class="tn s">'+t.name+'</div></div><span class="tag tx">+'+t.xp+'</span></div>';}).join('');
+  }
+  return h;
+}
+
+function pgTasks() {
+  var cats=['addictions','levelup','finance','religion','sante','social'];
+  var cat=G.cat;
+  var list=cat?AT.filter(function(t){return t.cat===cat;}):AT;
+  var pend=list.filter(function(t){return !t.done;}), done=list.filter(function(t){return t.done;});
+  var h='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><div class="ptitle">Toutes les tâches</div><button class="btn bp bsm" onclick="showAddT()">➕ Ajouter</button></div>';
+  h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">';
+  h+='<span class="tag tt" style="cursor:pointer;padding:5px 10px;'+(cat?'':'background:var(--bg3);color:var(--tx);')+'" onclick="go(\'tasks\',null)">Toutes</span>';
+  h+=cats.map(function(c){return '<span class="tag tt" style="cursor:pointer;padding:5px 10px;'+(cat===c?'background:var(--bg3);color:var(--tx);':'')+'" onclick="go(\'tasks\',\''+c+'\')">'+cname(c)+'</span>';}).join('');
+  h+='</div>';
+  if (pend.length) h+='<div class="stitle">'+pend.length+' en attente</div>'+pend.map(function(t){return tcard(t,true);}).join('');
+  if (done.length) h+='<div class="stitle">Accomplies ✅</div>'+done.map(function(t){return '<div class="tc '+cc(t.cat)+'" style="opacity:.4;"><div class="tck done"><svg width="11" height="11" viewBox="0 0 11 11"><path d="M1.5 5.5l3 3 5-5" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div><div class="ti"><div class="tn s">'+t.name+'</div></div></div>';}).join('');
+  return h;
+}
+
+function pgShop() {
+  var free=SHOP.filter(function(i){return i.free;}), lock=SHOP.filter(function(i){return !i.free;});
+  function si(item) {
+    var lk=!item.free&&!G.debtPaid;
+    var h='<div class="si'+(lk?' lk':'')+'" onclick="buyM('+JSON.stringify(item).replace(/"/g,'&quot;')+')">';
+    h+=(item.free?'<span class="fb fr">Libre</span>':(lk?'<span class="fb fl">🔒</span>':''));
+    h+='<div class="sico">'+item.icon+'</div><div class="snm">'+item.name+'</div><div class="spr">'+item.price+' ⬡</div><div class="ssh">'+item.shekel+'</div><div class="stm">'+item.time+'</div>';
+    if (!lk&&G.gold<item.price) h+='<div style="font-size:10px;color:var(--red);margin-top:3px;">Gold insuffisant</div>';
+    h+='</div>';
+    return h;
+  }
+  return '<div class="ptitle">Boutique des plaisirs</div><div class="psub">⬡ '+G.gold+' Gold — Dettes : '+(G.debtPaid?'✅ Remboursées':G.debtDone+'/'+G.debtAmt+'₪')+'</div>'+
+    '<div class="stitle">✅ Toujours disponibles</div><div class="shopg" style="margin-bottom:20px;">'+free.map(si).join('')+'</div>'+
+    '<div class="stitle">🔒 Débloquées après remboursement des dettes</div><div class="shopg">'+lock.map(si).join('')+'</div>';
+}
+
+function pgSoir() {
+  var today=new Date().toDateString();
+  var rev=G.dayRev.find(function(e){return e.date===today;})||{};
+  var j=G.journal.find(function(e){return e.date===today;})||{};
+  var done=AT.filter(function(t){return t.done;}), pend=AT.filter(function(t){return !t.done;});
+  var xpT=done.reduce(function(a,t){return a+t.xp;},0);
+  var last7=G.dayRev.slice(-7), w7=last7.reduce(function(a,e){return a+(e.wolt||0);},0), l7=last7.reduce(function(a,e){return a+(e.levelup||0);},0);
+  var h='<div class="ptitle">Bilan du soir</div><div class="psub">Saisis tes revenus et reflète sur ta journée</div>';
+  h+='<div class="stitle">💰 Revenus d\'aujourd\'hui</div><div class="card">';
+  h+='<div class="g2" style="margin-bottom:12px;"><div><label class="lbl">🛵 Wolt (₪)</label><input id="rv-w" type="number" class="inp ingold" placeholder="0" value="'+(rev.wolt||'')+'"></div><div><label class="lbl">🥗 Level Up (₪)</label><input id="rv-l" type="number" class="inp inxp" placeholder="0" value="'+(rev.levelup||'')+'"></div></div>';
+  if (rev.total) h+='<div style="background:var(--bg3);border-radius:9px;padding:9px 12px;font-size:12px;color:var(--tx2);margin-bottom:10px;">Enregistré : <b style="color:var(--tx)">'+rev.total+'₪</b></div>';
+  h+='<button class="btn bp bfw" onclick="saveRev()">💾 Enregistrer les revenus</button></div>';
+  if (last7.length) {
+    h+='<div class="stitle">📊 Revenus — 7 derniers jours</div><div class="card" style="margin-bottom:14px;">';
+    h+='<div class="g3" style="margin-bottom:14px;text-align:center;"><div><div style="font-size:18px;font-weight:800;color:var(--gold);">'+w7+'₪</div><div style="font-size:11px;color:var(--tx2);">Wolt 7j</div></div><div><div style="font-size:18px;font-weight:800;color:var(--xp);">'+l7+'₪</div><div style="font-size:11px;color:var(--tx2);">Level Up 7j</div></div><div><div style="font-size:18px;font-weight:800;color:var(--green);">'+(w7+l7)+'₪</div><div style="font-size:11px;color:var(--tx2);">Total 7j</div></div></div>';
+    var maxR=Math.max.apply(null,last7.map(function(e){return e.total||0;}).concat([1]));
+    var days=['D','L','M','M','J','V','S'];
+    h+='<div class="chartb" style="height:80px;margin-bottom:8px;">';
+    last7.forEach(function(e){
+      var hW=Math.round(((e.wolt||0)/maxR)*70), hL=Math.round(((e.levelup||0)/maxR)*70), lbl=days[new Date(e.date).getDay()];
+      h+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;"><div style="width:100%;display:flex;flex-direction:column;justify-content:flex-end;height:72px;gap:2px;">';
+      if(hL>0) h+='<div style="width:100%;height:'+hL+'px;background:var(--xp);border-radius:3px 3px 0 0;opacity:.8;"></div>';
+      if(hW>0) h+='<div style="width:100%;height:'+hW+'px;background:var(--gold);border-radius:'+(hL>0?'0':'3px 3px')+' 0 0;"></div>';
+      h+='</div><div style="font-size:9px;color:var(--tx3);">'+lbl+'</div></div>';
+    });
+    h+='</div><div style="display:flex;gap:10px;font-size:11px;color:var(--tx2);"><span><span style="display:inline-block;width:8px;height:8px;background:var(--gold);border-radius:2px;margin-right:3px;"></span>Wolt</span><span><span style="display:inline-block;width:8px;height:8px;background:var(--xp);border-radius:2px;margin-right:3px;"></span>Level Up</span></div></div>';
+  }
+  h+='<div class="stitle">✅ Récap tâches</div><div class="card" style="margin-bottom:14px;">';
+  h+='<div class="g3" style="margin-bottom:14px;text-align:center;"><div><div style="font-size:18px;font-weight:800;color:var(--green);">'+done.length+'</div><div style="font-size:11px;color:var(--tx2);">Accomplies</div></div><div><div style="font-size:18px;font-weight:800;color:var(--red);">'+pend.length+'</div><div style="font-size:11px;color:var(--tx2);">Manquées</div></div><div><div style="font-size:18px;font-weight:800;color:var(--xp);">+'+xpT+'</div><div style="font-size:11px;color:var(--tx2);">XP gagnés</div></div></div>';
+  h+=done.map(function(t){return '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:.5px solid var(--bd);font-size:12px;"><span style="color:var(--green)">✅</span><span style="flex:1">'+t.name+'</span><span style="color:var(--xp);font-size:11px">+'+t.xp+' XP</span></div>';}).join('');
+  if(pend.length) h+='<div style="font-size:11px;color:var(--tx2);margin:8px 0 4px;">Non accomplies :</div>'+pend.map(function(t){return '<div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:.5px solid var(--bd);font-size:12px;opacity:.6;"><span style="color:var(--red)">❌</span><span>'+t.name+'</span></div>';}).join('');
+  h+='</div>';
+  h+='<div class="stitle">📝 Journal du soir</div><div class="card">';
+  h+='<div style="display:flex;gap:8px;margin-bottom:12px;">';
+  ['😤','😐','🙂','😊','🔥'].forEach(function(m){ h+='<div class="moodbtn'+(j.mood===m?' sel':'')+'" data-m="'+m+'" onclick="setMood(\''+m+'\')">'+m+'</div>'; });
+  h+='</div>';
+  h+='<textarea id="jt" class="inp" rows="4" placeholder="Comment s\'est passée ta journée ?">'+(j.text||'')+'</textarea>';
+  h+='<button class="btn bp bfw" style="margin-top:10px" onclick="saveJournal()">💾 Enregistrer</button></div>';
+  return h;
+}
+
+function pgBoss() {
+  if (!G.bosses||!G.bosses.length) G.bosses=defBosses();
+  var boss=G.bosses[G.bosses.length-1], dl=Math.max(0,Math.round((new Date(boss.deadline)-new Date())/86400000)), prog=Math.min(100,Math.round(((boss.progress||0)/boss.target)*100));
+  var h='<div class="ptitle">Boss du mois ⚔️</div><div class="psub">Un défi mensuel majeur — le battre ou en payer le prix</div>';
+  h+='<div class="bosscard"><div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;"><div style="font-size:10px;color:var(--red);font-weight:700;text-transform:uppercase;letter-spacing:.1em;">Boss actif</div><div style="font-size:11px;color:var(--red);background:rgba(255,85,85,.1);padding:3px 9px;border-radius:20px;font-weight:600;">⏳ '+dl+'j restants</div></div>';
+  h+='<div style="font-size:18px;font-weight:800;margin-bottom:6px;">'+boss.title+'</div>';
+  h+='<div style="font-size:12px;color:var(--tx2);margin-bottom:14px;line-height:1.5;">'+boss.desc+'</div>';
+  h+='<div style="margin-bottom:14px;"><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tx2);margin-bottom:5px;"><span>Progression</span><span style="font-weight:600;color:var(--tx)">'+(boss.progress||0)+'/'+boss.target+'</span></div><div style="background:rgba(255,255,255,.06);border-radius:20px;height:8px;overflow:hidden;"><div style="height:100%;border-radius:20px;background:linear-gradient(90deg,var(--red),var(--purple));width:'+prog+'%;"></div></div></div>';
+  h+='<div class="g2" style="margin-bottom:14px;"><div style="background:rgba(61,204,122,.07);border:1px solid rgba(61,204,122,.15);border-radius:11px;padding:12px;text-align:center;"><div style="font-size:10px;color:var(--green);font-weight:700;margin-bottom:4px;">VICTOIRE</div><div style="font-size:15px;font-weight:800;color:var(--xp);">+'+boss.xp+' XP</div><div style="font-size:13px;font-weight:700;color:var(--gold);">+'+boss.gold+' Gold</div></div><div style="background:rgba(255,85,85,.07);border:1px solid rgba(255,85,85,.15);border-radius:11px;padding:12px;text-align:center;"><div style="font-size:10px;color:var(--red);font-weight:700;margin-bottom:4px;">ÉCHEC</div><div style="font-size:15px;font-weight:800;color:var(--red);">−'+boss.penalty+' Gold</div><div style="font-size:11px;color:var(--tx3);">+ tâche punition</div></div></div>';
+  h+='<div class="g2"><button class="btn bgh bsm" style="justify-content:center;" onclick="updBoss(\''+boss.id+'\')">➕ Progression</button>'+(boss.done?'':'<button class="btn bp bsm" style="justify-content:center;" onclick="doneBoss(\''+boss.id+'\')">🏆 Marquer réussi</button>')+'</div></div>';
+  h+='<div class="stitle">Créer un nouveau Boss</div><div class="card">';
+  h+='<div style="display:flex;flex-direction:column;gap:8px;">';
+  h+='<input id="bt" class="inp" placeholder="Titre du défi" maxlength="80">';
+  h+='<textarea id="bd" class="inp" rows="2" placeholder="Description..."></textarea>';
+  h+='<div class="g3"><div><label class="lbl">Objectif</label><input id="btar" type="number" class="inp" value="3" min="1"></div><div><label class="lbl">XP victoire</label><input id="bx" type="number" class="inp inxp" value="1000"></div><div><label class="lbl">Gold victoire</label><input id="bg" type="number" class="inp ingold" value="400"></div></div>';
+  h+='<button class="btn br bfw" onclick="createBoss()">⚔️ Créer ce Boss</button></div></div>';
+  var past=G.bosses.slice(0,-1).reverse();
+  if(past.length){ h+='<div class="stitle">Historique</div>'+past.map(function(b){return '<div class="card" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;"><div><div style="font-size:13px;font-weight:700;">'+b.title+'</div><div style="font-size:11px;color:var(--tx2);">'+b.deadline+'</div></div><span style="font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;background:'+(b.done?'rgba(61,204,122,.1)':'rgba(255,85,85,.1)')+';color:'+(b.done?'var(--green)':'var(--red)')+';">'+(b.done?'✅ Réussi':'❌ Raté')+'</span></div>';}).join(''); }
+  return h;
+}
+
+function pgStats() {
+  var cats=['addictions','levelup','finance','religion','sante','social'];
+  var done=AT.filter(function(t){return t.done;}), rate=AT.length>0?Math.round((done.length/AT.length)*100):0;
+  var bestS=Object.entries(G.streaks).reduce(function(b,e){return e[1].count>b.count?{cat:e[0],count:e[1].count}:b;},{cat:'—',count:0});
+  var prev=G.weekHist[G.weekHist.length-2], xpDiff=prev?G.xp-prev.xp:null;
+  var l=lv(), p=lvProg();
+  var h='<div class="ptitle">Statistiques</div><div class="psub">Ta progression semaine après semaine</div>';
+  h+='<div class="g2" style="margin-bottom:12px;">';
+  h+='<div class="csm" style="text-align:center"><div class="snum" style="color:var(--xp)">'+G.xp.toLocaleString()+'</div><div class="slbl">XP total</div>'+(xpDiff!==null?'<div style="font-size:11px;margin-top:3px;color:'+(xpDiff>=0?'var(--green)':'var(--red)')+';">'+(xpDiff>=0?'↑':'↓')+Math.abs(xpDiff)+' vs S-1</div>':'')+'</div>';
+  h+='<div class="csm" style="text-align:center"><div class="snum" style="color:var(--gold)">'+G.gold+'</div><div class="slbl">Gold disponible</div></div>';
+  h+='</div><div class="g2" style="margin-bottom:16px;">';
+  h+='<div class="csm" style="text-align:center"><div class="snum" style="color:var(--green)">'+rate+'%</div><div class="slbl">Taux complétion</div></div>';
+  h+='<div class="csm" style="text-align:center"><div class="snum" style="color:var(--orange)">🔥 '+bestS.count+'</div><div class="slbl">Meilleur streak'+(bestS.count>0?' ('+cname(bestS.cat)+')':'')+'</div></div>';
+  h+='</div>';
+  var hist=G.weekHist.slice(-8);
+  h+='<div class="stitle">XP cumulé — semaines</div><div class="card" style="margin-bottom:14px;">';
+  if(hist.length<2){ h+='<div style="color:var(--tx2);font-size:12px;">Continue à jouer — le graphique apparaîtra bientôt !</div>'; }
+  else {
+    var maxXP=Math.max.apply(null,hist.map(function(w){return w.xp;}).concat([G.xp,100]));
+    h+='<div class="chartb" style="height:120px;">';
+    hist.forEach(function(w,i){
+      var ht=Math.max(8,Math.round((w.xp/maxXP)*110)), isL=i===hist.length-1, wn=w.week.split('-W')[1]?'S'+w.week.split('-W')[1]:'';
+      h+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;"><div style="font-size:9px;color:var(--tx3);">'+w.xp+'</div><div style="width:100%;height:'+ht+'px;background:'+(isL?'var(--xp)':'rgba(74,158,255,.3)')+';border-radius:4px 4px 0 0;"></div><div style="font-size:9px;color:var(--tx3);">'+wn+'</div></div>';
+    });
+    h+='</div>';
+  }
+  h+='</div>';
+  var catXP={};cats.forEach(function(c){catXP[c]=done.filter(function(t){return t.cat===c;}).reduce(function(a,t){return a+t.xp;},0);});
+  var maxCX=Math.max.apply(null,Object.values(catXP).concat([1]));
+  h+='<div class="stitle">Répartition par catégorie</div><div class="card" style="margin-bottom:14px;">';
+  cats.forEach(function(c){
+    var dc=done.filter(function(t){return t.cat===c;}).length, ac=AT.filter(function(t){return t.cat===c;}).length;
+    h+='<div class="cbr"><div style="width:80px;font-size:11px;color:'+ccolor(c)+';font-weight:600;">'+cname(c)+'</div><div class="cbt"><div class="cbf" style="width:'+Math.round((catXP[c]/maxCX)*100)+'%;background:'+ccolor(c)+';"></div></div><div style="font-size:11px;color:var(--tx2);width:90px;text-align:right;">+'+catXP[c]+' XP • '+dc+'/'+ac+'</div></div>';
+  });
+  h+='</div>';
+  h+='<div class="stitle">Streaks par catégorie</div><div class="card">';
+  cats.forEach(function(c){
+    var s=G.streaks[c]||{count:0}, mu=smult(c);
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:.5px solid var(--bd);font-size:12px;"><span style="color:'+ccolor(c)+';font-weight:500;">'+cname(c)+'</span><div style="display:flex;gap:6px;align-items:center;">'+(s.count>0?'<span class="sbadge">🔥 '+s.count+'j</span>':'<span style="color:var(--tx3);">Pas encore démarré</span>')+(mu>1?'<span class="tag tx">×'+mu+'</span>':'')+'</div></div>';
+  });
+  h+='</div>';
+  return h;
+}
+
+function pgProfile() {
+  var l=lv(), p=lvProg(), cats=['addictions','levelup','finance','religion','sante','social'];
+  var done=AT.filter(function(t){return t.done;}), catXP={};
+  cats.forEach(function(c){catXP[c]=done.filter(function(t){return t.cat===c;}).reduce(function(a,t){return a+t.xp;},0);});
+  var maxCX=Math.max.apply(null,Object.values(catXP).concat([1]));
+  var h='<div class="ptitle">Profil</div>';
+  h+='<div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;"><div style="width:64px;height:64px;border-radius:16px;background:linear-gradient(135deg,var(--xp2),var(--purple));display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800;color:#fff;flex-shrink:0;">I</div><div><div style="font-size:19px;font-weight:800;">Ilan</div><div style="font-size:12px;color:var(--tx2);">Niveau '+l.n+' — '+l.title+'</div><div style="margin-top:6px;display:flex;gap:12px;"><span style="font-size:12px;color:var(--xp);">⚡ '+G.xp.toLocaleString()+' XP</span><span style="font-size:12px;color:var(--gold);">⬡ '+G.gold+' Gold</span></div></div></div>';
+  h+='<div class="card" style="margin-bottom:14px;"><div style="font-weight:600;margin-bottom:10px;font-size:13px;">Progression Nv.'+l.n+' → Nv.'+(l.n+1)+'</div><div style="display:flex;justify-content:space-between;font-size:11px;color:var(--tx2);margin-bottom:5px;"><span>'+G.xp+' XP</span><span>'+l.next+' XP</span></div><div class="xbar" style="height:8px;"><div class="xfill" style="width:'+p+'%;"></div></div></div>';
+  h+='<div class="stitle">Stats par catégorie</div><div class="card" style="margin-bottom:14px;">';
+  cats.forEach(function(c){h+='<div class="cbr"><div style="width:80px;font-size:11px;color:'+ccolor(c)+';font-weight:600;">'+cname(c)+'</div><div class="cbt"><div class="cbf" style="width:'+Math.round((catXP[c]/maxCX)*100)+'%;background:'+ccolor(c)+';"></div></div><div style="font-size:11px;font-weight:600;color:'+ccolor(c)+';width:60px;text-align:right;">+'+catXP[c]+' XP</div></div>';});
+  h+='</div>';
+  h+='<div class="stitle">Objectifs 6 mois</div><div class="card">';
+  h+='<div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:.5px solid var(--bd);"><span>Level Up dépasse Wolt</span><span style="color:var(--tx3)">En cours...</span></div>';
+  h+='<div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:.5px solid var(--bd);"><span>10 000₪ d\'épargne</span><span style="color:var(--tx3)">En cours...</span></div>';
+  h+='<div style="display:flex;justify-content:space-between;font-size:13px;padding:8px 0;"><span>Dettes remboursées</span><span style="color:'+(G.debtPaid?'var(--green)':'var(--tx3)')+';">'+(G.debtPaid?'✅ Fait !':G.debtDone+'/'+G.debtAmt+'₪')+'</span></div></div>';
+  return h;
+}
+
+
+function pgCalendar() {
+  var h = '<div class="ptitle">Calendrier</div><div class="psub">Ta progression jour par jour — style GitHub</div>';
+
+  // Build 3 months of data
+  var now = new Date();
+  var months = [];
+  for (var mi = 2; mi >= 0; mi--) {
+    var d = new Date(now.getFullYear(), now.getMonth() - mi, 1);
+    months.push({year: d.getFullYear(), month: d.getMonth()});
+  }
+
+  var monthNames = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+  var dayNames = ['L','M','M','J','V','S','D'];
+
+  // Legend
+  h += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:20px;font-size:11px;color:var(--tx2);">';
+  h += '<span>Moins</span>';
+  h += '<div style="width:12px;height:12px;border-radius:3px;background:var(--bg3);border:1px solid var(--bd);"></div>';
+  h += '<div style="width:12px;height:12px;border-radius:3px;background:#1a3a1a;"></div>';
+  h += '<div style="width:12px;height:12px;border-radius:3px;background:#2d6a2d;"></div>';
+  h += '<div style="width:12px;height:12px;border-radius:3px;background:#3dcc7a;opacity:.6;"></div>';
+  h += '<div style="width:12px;height:12px;border-radius:3px;background:var(--green);"></div>';
+  h += '<span>Plus</span></div>';
+
+  // Stats summary
+  var allDays = Object.values(G.dayHist);
+  var totalDays = allDays.length;
+  var perfectDays = allDays.filter(function(d){return d.total>0&&(d.done/d.total)>=0.8;}).length;
+  var totalXP = allDays.reduce(function(a,d){return a+(d.xp||0);},0);
+  var bestStreak = 0, curStreak = 0;
+  // Calculate longest streak
+  var sortedDates = Object.keys(G.dayHist).sort(function(a,b){return new Date(a)-new Date(b);});
+  sortedDates.forEach(function(ds){
+    var d = G.dayHist[ds];
+    if (d.total>0 && (d.done/d.total)>=0.5) { curStreak++; bestStreak=Math.max(bestStreak,curStreak); }
+    else curStreak=0;
+  });
+
+  h += '<div class="g3" style="margin-bottom:20px;">';
+  h += '<div class="csm" style="text-align:center"><div class="snum" style="color:var(--green)">'+perfectDays+'</div><div class="slbl">Jours parfaits (80%+)</div></div>';
+  h += '<div class="csm" style="text-align:center"><div class="snum" style="color:var(--orange)">'+bestStreak+'</div><div class="slbl">Meilleure série</div></div>';
+  h += '<div class="csm" style="text-align:center"><div class="snum" style="color:var(--xp)">'+totalDays+'</div><div class="slbl">Jours joués</div></div>';
+  h += '</div>';
+
+  // Render each month
+  months.forEach(function(m) {
+    var firstDay = new Date(m.year, m.month, 1);
+    var lastDay = new Date(m.year, m.month+1, 0);
+    var startDow = (firstDay.getDay()+6)%7; // Monday=0
+
+    h += '<div class="card" style="margin-bottom:14px;">';
+    h += '<div style="font-weight:700;font-size:14px;margin-bottom:14px;color:var(--tx);">'+monthNames[m.month]+' '+m.year+'</div>';
+
+    // Day headers
+    h += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px;">';
+    dayNames.forEach(function(dn){ h += '<div style="text-align:center;font-size:10px;color:var(--tx3);font-weight:600;">'+dn+'</div>'; });
+    h += '</div>';
+
+    // Day cells
+    h += '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">';
+
+    // Empty cells before first day
+    for (var i=0; i<startDow; i++) h += '<div></div>';
+
+    // Day cells
+    for (var day=1; day<=lastDay.getDate(); day++) {
+      var date = new Date(m.year, m.month, day);
+      var dateStr = date.toDateString();
+      var isToday = dateStr === new Date().toDateString();
+      var isFuture = date > new Date();
+      var snap = G.dayHist[dateStr];
+
+      var color, pct=0, title='';
+      if (isFuture) {
+        color = 'transparent';
+      } else if (!snap || snap.total===0) {
+        color = 'var(--bg3)';
+        title = day+' — Pas de données';
+      } else {
+        pct = Math.round((snap.done/snap.total)*100);
+        title = day+' — '+snap.done+'/'+snap.total+' tâches ('+pct+'%) • +'+snap.xp+' XP';
+        if (pct===0) color='var(--bg3)';
+        else if (pct<25) color='#1a2e1a';
+        else if (pct<50) color='#1f3d1f';
+        else if (pct<75) color='#2d6a2d';
+        else if (pct<100) color='rgba(61,204,122,.5)';
+        else color='var(--green)';
+      }
+
+      var border = isToday ? '2px solid var(--xp)' : '1px solid rgba(255,255,255,.04)';
+      var dayStyle = 'aspect-ratio:1;border-radius:4px;background:'+color+';border:'+border+';cursor:'+(snap&&!isFuture ? 'pointer' : 'default')+';transition:transform .1s;';
+      h += '<div data-date="' + dateStr + '" style="' + dayStyle + '" class="cal-day">';
+      if (isToday) h += '<div style="position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:8px;color:var(--xp);white-space:nowrap;">auj.</div>';
+      h += '</div>';
+    }
+    h += '</div>';
+
+    // Month summary
+    var monthDays = Object.keys(G.dayHist).filter(function(ds){
+      var d=new Date(ds); return d.getMonth()===m.month&&d.getFullYear()===m.year;
+    });
+    var monthDone = monthDays.filter(function(ds){
+      var s=G.dayHist[ds]; return s&&s.total>0&&(s.done/s.total)>=0.5;
+    }).length;
+    var monthXP = monthDays.reduce(function(a,ds){return a+(G.dayHist[ds].xp||0);},0);
+    if (monthDays.length) {
+      h += '<div style="margin-top:14px;padding-top:10px;border-top:1px solid var(--bd);display:flex;gap:16px;font-size:11px;color:var(--tx2);">';
+      h += '<span>✅ <b style="color:var(--tx)">'+monthDone+'</b> jours actifs</span>';
+      h += '<span>⚡ <b style="color:var(--xp)">+'+monthXP+' XP</b> ce mois</span>';
+      h += '<span>📅 <b style="color:var(--tx)">'+monthDays.length+'</b> jours joués</span>';
+      h += '</div>';
+    }
+    h += '</div>';
+  });
+
+  return h;
+}
+
+function showDayDetail(dateStr) {
+  var snap = G.dayHist[dateStr];
+  if (!snap) return;
+  var d = new Date(dateStr);
+  var pct = snap.total>0 ? Math.round((snap.done/snap.total)*100) : 0;
+  var dayNames2 = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  var monthNames2 = ['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Août','Sep','Oct','Nov','Déc'];
+  var j = G.journal.find(function(e){return e.date===dateStr;})||{};
+  var rev = G.dayRev.find(function(e){return e.date===dateStr;})||{};
+
+  var color = pct>=100?'var(--green)':pct>=75?'rgba(61,204,122,.5)':pct>=50?'#2d6a2d':pct>=25?'#1f3d1f':'var(--tx3)';
+
+  var h = '<div class="mt">'+dayNames2[d.getDay()]+' '+d.getDate()+' '+monthNames2[d.getMonth()]+'</div>';
+  h += '<div style="display:flex;gap:12px;margin-bottom:16px;">';
+  h += '<div style="flex:1;background:var(--bg3);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:22px;font-weight:800;color:'+color+'">'+pct+'%</div><div style="font-size:11px;color:var(--tx2);">Complétion</div></div>';
+  h += '<div style="flex:1;background:var(--bg3);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:22px;font-weight:800;color:var(--xp)">+'+snap.xp+'</div><div style="font-size:11px;color:var(--tx2);">XP gagnés</div></div>';
+  h += '<div style="flex:1;background:var(--bg3);border-radius:10px;padding:12px;text-align:center;"><div style="font-size:22px;font-weight:800;color:var(--tx)">'+snap.done+'/'+snap.total+'</div><div style="font-size:11px;color:var(--tx2);">Tâches</div></div>';
+  h += '</div>';
+
+  if (rev.total) {
+    h += '<div style="background:var(--bg3);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12px;display:flex;gap:16px;">';
+    h += '<span>🛵 Wolt : <b style="color:var(--gold)">'+rev.wolt+'₪</b></span>';
+    h += '<span>🥗 Level Up : <b style="color:var(--xp)">'+rev.levelup+'₪</b></span>';
+    h += '<span>Total : <b style="color:var(--green)">'+rev.total+'₪</b></span>';
+    h += '</div>';
+  }
+
+  if (j.text) {
+    h += '<div style="background:var(--bg3);border-radius:10px;padding:10px 12px;margin-bottom:16px;">';
+    h += '<div style="font-size:11px;color:var(--tx2);margin-bottom:4px;">'+(j.mood||'🙂')+' Journal</div>';
+    h += '<div style="font-size:12px;line-height:1.5;color:var(--tx);">'+j.text+'</div>';
+    h += '</div>';
+  }
+
+  if (snap.cats && Object.keys(snap.cats).length) {
+    h += '<div style="font-size:11px;color:var(--tx2);margin-bottom:8px;">Catégories actives :</div>';
+    h += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;">';
+    Object.entries(snap.cats).forEach(function(e){
+      h += '<span class="tag" style="background:'+ccolor(e[0])+'22;color:'+ccolor(e[0])+';">'+cname(e[0])+' ('+e[1]+')</span>';
+    });
+    h += '</div>';
+  }
+
+  h += '<button class="btn bgh bfw" onclick="closeM()">Fermer</button>';
+  showM(h);
+}
+
+function pgCoach() {
+  var h='<div class="ptitle">Coach IA</div><div class="psub">Je suis ton coach — parle-moi de tes tâches, blocages, journée.</div>';
+  h+='<div class="cw"><div class="cms" id="cms">';
+  G.chat.forEach(function(m){ h+=msgH(m); });
+  h+='</div><div class="ciw"><textarea class="ci" id="ci" placeholder="Dis-moi ce que tu as accompli..." onkeydown="chatK(event)"></textarea><button class="btn bp" onclick="sendChat()">Envoyer</button></div></div>';
+  return h;
+}
+function msgH(m) {
+  var u=m.role==='user';
+  return '<div class="msg'+(u?' u':' coach')+'"><div class="mav '+(u?'u':'c')+'">'+(u?'I':'⚡')+'</div><div class="mbbl">'+m.content+'</div></div>';
+}
+function initCoach() {
+  var el=document.getElementById('cms'); if(el) el.scrollTop=el.scrollHeight;
+  if (!G.chat.length) {
+    var pend=AT.filter(function(t){return !t.done;});
+    var over=AT.filter(function(t){return !t.done&&(Date.now()-t.added)>3*86400000;});
+    var txt='Salou Ilan ! 💪 Niveau <b>'+lv().n+'</b> — <b>'+G.xp+' XP</b> — <b>'+G.gold+' Gold</b>.<br><br><b>'+pend.length+' tâches</b> en attente.';
+    if(over.length) txt+=' ⚠️ <b>'+over.length+' tâche(s) en retard</b> depuis +3 jours !';
+    txt+='<br><br>Dis-moi ce que tu as fait aujourd\'hui, ou pose-moi une question.';
+    addCoachM(txt);
+  }
+}
+function addCoachM(c) {
+  G.chat.push({role:'assistant',content:c});
+  var el=document.getElementById('cms'); if(!el) return;
+  var d=document.createElement('div'); d.innerHTML=msgH({role:'assistant',content:c});
+  el.appendChild(d.firstChild); el.scrollTop=el.scrollHeight;
+}
+function addUserM(c) {
+  G.chat.push({role:'user',content:c});
+  var el=document.getElementById('cms'); if(!el) return;
+  var d=document.createElement('div'); d.innerHTML=msgH({role:'user',content:c});
+  el.appendChild(d.firstChild); el.scrollTop=el.scrollHeight;
+}
+function chatK(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
+async function sendChat(){
+  var inp=document.getElementById('ci'),txt=(inp.value||'').trim();if(!txt)return;
+  inp.value='';addUserM(txt);
+  var el=document.getElementById('cms');
+  var td=document.createElement('div');td.className='msg coach';td.innerHTML='<div class="mav c">⚡</div><div class="mbbl"><div class="typing"><span></span><span></span><span></span></div></div>';
+  el.appendChild(td);el.scrollTop=el.scrollHeight;
+  var done=AT.filter(function(t){return t.done;}).map(function(t){return t.name;}).join(', ')||'aucune';
+  var over=AT.filter(function(t){return !t.done&&(Date.now()-t.added)>3*86400000;}).map(function(t){return t.name;}).join(', ')||'aucune';
+  var sys='Tu es le coach personnel d\'Ilan dans son jeu RPG de vie. Français, direct, motivant. Sa situation : livreur Wolt (10-12K₪/mois) + Level Up repas diététiques (1-2K₪, <10 clients). Objectif : Level Up > Wolt + 10K₪ épargne en 6 mois. Dettes : '+(G.debtAmt-G.debtDone)+'₪. Addictions : tabac+cannabis. Sport actif. Religion : juif, reprend tephilines. Jeu : Nv.'+lv().n+' — '+G.xp+' XP — '+G.gold+' Gold. Accompli : '+done+'. En retard : '+over+'. Max 4-5 phrases percutantes. **bold** pour points clés.';
+  var msgs=G.chat.slice(0,-1).map(function(m){return {role:m.role,content:m.content.replace(/<[^>]+>/g,'')};});
+  msgs.push({role:'user',content:txt});
+  try{
+    var r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:sys,messages:msgs})});
+    var data=await r.json();td.remove();
+    var reply=(data.content&&data.content[0]&&data.content[0].text)||'Continue tes tâches !';
+    addCoachM(reply.replace(/\*\*(.*?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>'));
+  }catch(e){td.remove();addCoachM('Connexion indisponible en local — opérationnel une fois en ligne !');}
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAV + INIT
+// ═══════════════════════════════════════════════════════════
+document.querySelectorAll('.ni').forEach(function(el){
+  el.addEventListener('click',function(){ go(el.dataset.p, el.dataset.c||undefined); });
+});
+
+function init(){
+  AT = TASKS.map(function(t){return obj(t,{done:false,added:Date.now()});});
+  load();
+  if(!G.bosses||!G.bosses.length) G.bosses=defBosses();
+  draw();
+}
+init();
+</script>
+</body>
+</html>
